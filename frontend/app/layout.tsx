@@ -12,11 +12,11 @@ import { Nav } from "@/components/nav";
 import { GameProvider } from "@/lib/game-state";
 
 export const metadata: Metadata = {
-  title: "REAL or FAKE — the AI Agent Court on GenLayer",
+  title: "RefAalke — the AI Agent Court on GenLayer",
   description:
     "One ERC-8004 agent stands trial every day. Guess REAL or FAKE — 1,001 AI jurors fetch live chain evidence and deliver the verdict.",
   openGraph: {
-    title: "REAL or FAKE — the AI Agent Court on GenLayer",
+    title: "RefAalke — the AI Agent Court on GenLayer",
     description:
       "Daily game + trust primitive: evidence-grounded verdicts for ERC-8004 agents.",
   },

@@ -72,7 +72,7 @@ function drawShareCard(streak: number, wins: number, grid: number[]): string {
   // eyebrow
   ctx.fillStyle = "#67E8F9";
   ctx.font = mono(20, 500);
-  ctx.fillText("REAL / FAKE — AI AGENT COURT · GENLAYER", 64, 92);
+  ctx.fillText("REFAALKE — AI AGENT COURT · GENLAYER", 64, 92);
 
   // headline (two lines)
   ctx.fillStyle = "#EDEBE4";
@@ -159,7 +159,7 @@ export default function StatsPage() {
   async function download() {
     if (!png || !linkRef.current) return;
     linkRef.current.href = png;
-    linkRef.current.download = `realorfake-day-47.png`;
+    linkRef.current.download = `refaalke-day-47.png`;
     linkRef.current.click();
   }
 

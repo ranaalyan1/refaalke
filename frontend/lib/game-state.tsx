@@ -18,7 +18,8 @@ import type { DayRecord, VerdictKind } from "./types";
 import { DEMO_HISTORY, TODAY_DOSSIER, DEMO_VERDICT } from "./demo-data";
 import { utcDayIndex } from "./utils";
 
-const LS_KEY = "realorfake:state:v1";
+const LS_KEY = "refaalke:state:v1";
+const LEGACY_LS_KEY = "realorfake:state:v1"; // pre-rename state
 
 export interface PersistedState {
   todayGuess: 0 | 1 | null;
@@ -54,7 +55,9 @@ const Ctx = createContext<GameCtx | null>(null);
 function load(): PersistedState {
   if (typeof window === "undefined") return initialState;
   try {
-    const raw = window.localStorage.getItem(LS_KEY);
+    const raw =
+      window.localStorage.getItem(LS_KEY) ??
+      window.localStorage.getItem(LEGACY_LS_KEY);
     if (!raw) return initialState;
     const parsed = JSON.parse(raw) as PersistedState;
     return {

@@ -72,7 +72,7 @@ Cursor visible. Browser: Chrome, window without bookmarks bar, demo mode ON
 ### 1:20–1:30 — Close (hold on the Hall of Shame header or the stamp)
 - **VO, verbatim:** “The jury is 1,001 AI validators. The scammers are
   real. So is the verdict.”
-- End card (2s): `REAL / FAKE — daily. on-chain. decided by evidence.`
+- End card (2s): `RefAalke — daily. on-chain. decided by evidence.`
   + `built on GenLayer · cases from ERC-8004`.
 
 ---

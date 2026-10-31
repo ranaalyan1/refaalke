@@ -83,7 +83,7 @@ async function materializeFeedbackFiles(agent: PoolAgent): Promise<void> {
       (t) => t.from === f.address && Math.abs(t.ts - f.timestamp) <= 7 * 86400
     );
     const doc = {
-      schema: "realorfake.feedback/v1",
+      schema: "refaalke.feedback/v1",
       agentId: agent.agentId,
       feedbackId: f.feedbackId,
       reviewer: f.address,
@@ -132,7 +132,7 @@ export async function jobSnapshot(): Promise<void> {
   await materializeFeedbackFiles(pick);
 
   const snapshot = {
-    schema: "realorfake.snapshot/v1",
+    schema: "refaalke.snapshot/v1",
     day: dayStr,
     takenAt: new Date().toISOString(),
     agentId: pick.agentId,

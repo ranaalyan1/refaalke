@@ -1,4 +1,4 @@
-# ⚖ REAL or FAKE — The AI Agent Court Game on GenLayer
+# ⚖ RefAalke — The AI Agent Court Game on GenLayer
 
 **Every day, one real on-chain AI agent stands trial. You guess REAL or FAKE.
 A decentralized jury of GenLayer validators fetches live blockchain evidence

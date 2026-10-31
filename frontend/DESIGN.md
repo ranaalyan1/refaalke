@@ -1,4 +1,4 @@
-# REAL or FAKE — frontend build spec
+# RefAalke (formerly REAL or FAKE) — frontend build spec
 
 > Written before code, per the MotionSites skill workflow. Every element gets
 > real values. Build exactly this.
@@ -83,7 +83,7 @@ video: motion is carried by choreography + the stamp.
 ## Screens & copy (real copy, no placeholders)
 
 ### 1. HOME `/` — "Today's case"
-Floating pill nav: monogram ⚖ `REAL/FAKE` · links: Today, Jury, Shame,
+Floating pill nav: monogram ⚖ `RefAalke` · links: Today, Jury, Shame,
 Leaderboard · CTA "Connect".
 Hero (full-height, backdrop image at 22% opacity + scrim):
 - mono eyebrow: `DAILY CASE — DAY 47 · BASE MAINNET · 0x8004:A169`

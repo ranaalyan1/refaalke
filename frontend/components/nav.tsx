@@ -35,13 +35,13 @@ export function Nav() {
           <Link
             href="/"
             className="flex h-10 items-center gap-2 rounded-full bg-white/[0.06] pl-3 pr-4 transition hover:bg-white/[0.1]"
-            aria-label="REAL or FAKE — home"
+            aria-label="RefAalke — home"
           >
             <span aria-hidden className="text-[15px] leading-none">
               ⚖
             </span>
             <span className="font-mono text-[13px] font-medium tracking-tight text-ink">
-              REAL<span className="px-1 opacity-60">/</span>FAKE
+              RefAalke
             </span>
           </Link>
 

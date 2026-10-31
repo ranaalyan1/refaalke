@@ -1,6 +1,6 @@
 # { "Depends": "py-genlayer:" }
 """
-AgentCourt.py — "REAL or FAKE": The AI Agent Court Game on GenLayer
+AgentCourt.py — "RefAalke" (formerly REAL or FAKE): The AI Agent Court Game on GenLayer
 ====================================================================
 
 A daily game + trust primitive: every day one real ERC-8004 agent (registered

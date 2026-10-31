@@ -1,8 +1,8 @@
 {
-  "name": "realorfake-indexer",
+  "name": "refaalke-indexer",
   "version": "1.0.0",
   "private": true,
-  "description": "Off-chain indexer for REAL or FAKE — ERC-8004 candidate pool, daily evidence snapshots, verdict keeper",
+  "description": "Off-chain indexer for RefAalke — ERC-8004 candidate pool, daily evidence snapshots, verdict keeper",
   "type": "module",
   "scripts": {
     "pool": "tsx src/index.ts pool",

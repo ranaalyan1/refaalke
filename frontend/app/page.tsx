@@ -87,7 +87,7 @@ export default function HomePage() {
 
         <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col justify-end px-4 pb-14 pt-32 sm:px-6 sm:pb-20 md:justify-center md:pb-0">
           <h1 className="sr-only">
-            REAL or FAKE — the AI agent court
+            RefAalke — the AI agent court
           </h1>
 
           {/* blurred intro label — own motion props so the entrance y-slide
@@ -221,7 +221,7 @@ export default function HomePage() {
       <footer className="border-t border-line px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink/40">
-            REAL/FAKE — the AI agent court · built on GenLayer
+            RefAalke — the AI agent court · built on GenLayer
           </p>
           <p className="max-w-[52ch] text-[12px] leading-relaxed text-ink/35">
             A daily game, and a Validation layer the ERC-8004 standard hasn&apos;t

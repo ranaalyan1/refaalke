@@ -1,6 +1,6 @@
 # AgentCourt.py — the Intelligent Contract
 
-Python Intelligent Contract (GenVM) for **REAL or FAKE**, the daily AI-agent
+Python Intelligent Contract (GenVM) for **RefAalke**, the daily AI-agent
 court game on GenLayer.
 
 - **Spec compliance:** consensus rules R1–R8 from the project spec are
