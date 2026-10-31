@@ -1,20 +1,22 @@
 "use client";
 /**
  * Home / TODAY'S CASE — the daily hook.
- * Full-height noir hero (backdrop at low opacity + scrim), then the case
- * file and the two-button choice. One idea in the first screen: today's trial.
+ * Full-screen noir hero: mouse-scrubbed court video, blurred intro label,
+ * typewriter line, pill actions (Mainframe-inspired choreography, court
+ * voice). The docket and the two-button choice follow below the fold.
  */
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { CaseFile } from "@/components/case-file";
 import { GuessButtons } from "@/components/guess-buttons";
 import { MonoLabel, EASE } from "@/components/motion";
+import { ScrubVideo } from "@/components/scrub-video";
 import { Badge } from "@/components/ui";
 import { useGame } from "@/lib/game-state";
 import { formatCountdown, msUntilJuryTime } from "@/lib/utils";
 import { fetchRegisteredCount, REGISTRY_LINK } from "@/lib/base";
 import { IS_DEMO } from "@/lib/contract";
+import { useTypewriter } from "@/lib/use-typewriter";
 
 function CountdownChip() {
   const [left, setLeft] = useState<number | null>(null);
@@ -52,9 +54,13 @@ function Ticker() {
   );
 }
 
+const TYPE_TEXT =
+  "Glad you stopped in. The evidence is live and the validators are already watching. Now, what does the evidence say?";
+
 export default function HomePage() {
   const { dossier } = useGame();
   const reduce = useReducedMotion();
+  const { displayed, done } = useTypewriter(TYPE_TEXT);
 
   const anim = (delay: number) =>
     reduce
@@ -67,56 +73,102 @@ export default function HomePage() {
 
   return (
     <main>
-      {/* ---------------- HERO ---------------- */}
-      <section className="relative flex min-h-[100dvh] flex-col overflow-hidden">
-        {/* backdrop: noir courtroom, subject right, type zone left */}
-        <div aria-hidden className="absolute inset-0">
-          <Image
-            src="/hero-courtroom.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[70%_center] opacity-[0.30]"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,#060607_6%,rgba(6,6,7,0.72)_50%,rgba(6,6,7,0.38)_100%)]" />
+      {/* ---------------- HERO — Mainframe-inspired choreography ---------------- */}
+      <section className="relative flex h-[100svh] min-h-[560px] flex-col overflow-hidden">
+        {/* mouse-scrubbed court video (no autoplay; poster = still frame) */}
+        <ScrubVideo />
+
+        {/* scrims: type zone dark on the left, bottom fade into the page */}
+        <div aria-hidden className="absolute inset-0 z-[1]">
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,#060607_8%,rgba(6,6,7,0.78)_48%,rgba(6,6,7,0.34)_100%)]" />
           <div className="absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(180deg,transparent,#060607)]" />
           <div className="ambient absolute inset-0" />
         </div>
 
-        <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col justify-end px-4 pb-14 pt-32 sm:px-6 sm:pb-20">
-          <motion.div {...anim(0.05)} className="flex flex-wrap items-center gap-3">
-            <MonoLabel className="text-cold/80">
-              daily case — day 47 · base mainnet · 0x8004:a169
-            </MonoLabel>
+        <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col justify-end px-4 pb-14 pt-32 sm:px-6 sm:pb-20 md:justify-center md:pb-0">
+          <h1 className="sr-only">
+            REAL or FAKE — the AI agent court
+          </h1>
+
+          {/* blurred intro label — own motion props so the entrance y-slide
+              never overwrites the persistent blur(4px) via filter tweening */}
+          <motion.div
+            {...(reduce
+              ? {}
+              : {
+                  initial: { opacity: 0, y: 16 },
+                  animate: { opacity: 1, y: 0 },
+                  transition: { duration: 0.85, ease: EASE, delay: 0.05 },
+                })}
+            className="pointer-events-none mb-5 select-none sm:mb-6"
+            style={{
+              fontSize: "clamp(18px, 4vw, 26px)",
+              lineHeight: 1.3,
+              fontWeight: 400,
+              color: "#EDEBE4",
+              filter: "blur(4px)",
+            }}
+            aria-hidden
+          >
+            Hey there, welcome to Agent Court,
+            <br />
+            Live evidence, independent validators, one daily verdict
           </motion.div>
 
-          <motion.h1
-            {...anim(0.15)}
-            className="mt-5 text-[clamp(44px,8.4vw,92px)] font-medium leading-[0.96] tracking-[-0.035em]"
-          >
-            Real agents.
-            <br />
-            <span className="text-ink/45">Fake scores.</span>
-          </motion.h1>
-
+          {/* typewriter */}
           <motion.p
-            {...anim(0.28)}
-            className="mt-5 max-w-[46ch] text-[15.5px] leading-relaxed text-ink/60 sm:text-[17px]"
+            {...anim(0.15)}
+            className="mb-5 max-w-[52ch] text-ink sm:mb-6"
+            style={{
+              fontSize: "clamp(18px, 4vw, 26px)",
+              lineHeight: 1.35,
+              fontWeight: 400,
+              minHeight: "54px",
+            }}
           >
-            Every day one AI agent from the live ERC-8004 registry stands trial. You
-            guess. 1,001 AI jurors fetch the chain. The verdict decides your streak.
+            {displayed}
+            {!done && (
+              <span
+                className="cursor-blink ml-[2px] inline-block h-[1.1em] w-[2px] bg-ink align-middle"
+                aria-hidden
+              />
+            )}
           </motion.p>
 
+          {/* action pills — independent 400ms entrance */}
           <motion.div
-            {...anim(0.4)}
-            className="mt-7 flex flex-wrap items-center gap-3"
+            {...(reduce
+              ? {}
+              : {
+                  initial: { opacity: 0, y: 8 },
+                  animate: { opacity: 1, y: 0 },
+                  transition: { duration: 0.4, ease: EASE, delay: 0.4 },
+                })}
+            className="flex flex-wrap items-center gap-x-1 gap-y-2"
+          >
+            <a
+              href="#today"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-ink/10 bg-ink px-4 py-[0.45em] text-[13px] text-bg transition-colors duration-200 hover:bg-transparent hover:text-ink sm:px-5 sm:text-[15px]"
+            >
+              Lock in a guess&nbsp;→
+            </a>
+            <a
+              href="#today"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-ink/25 bg-transparent px-4 py-[0.45em] text-[13px] text-ink transition-colors duration-200 hover:bg-ink hover:text-bg sm:px-5 sm:text-[15px]"
+            >
+              How this court works&nbsp;→
+            </a>
+          </motion.div>
+
+          <motion.div
+            {...anim(0.55)}
+            className="mt-6 flex flex-wrap items-center gap-3"
           >
             <CountdownChip />
             <Badge tone="cold">verdict = evidence, not vibes</Badge>
           </motion.div>
 
-          <motion.div {...anim(0.52)} className="mt-6">
+          <motion.div {...anim(0.68)} className="mt-5">
             <Ticker />
           </motion.div>
         </div>
