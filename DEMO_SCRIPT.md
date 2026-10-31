@@ -15,7 +15,7 @@ Cursor visible. Browser: Chrome, window without bookmarks bar, demo mode ON
 
 ### 0:00–0:06 — Cold open (full screen, home hero)
 - App already loaded at `/`, hero fills the frame: the mouse-scrubbed
-  courtroom video behind the blurred intro label. Sweep the cursor
+  pastel courtroom behind the blurred intro label. Sweep the cursor
   left↔right to scrub the footage, then let the typewriter line finish.
 - **VO:** “There are 1.3 million AI agents on-chain. The researchers say
   97% of the scores they show you are fake. Prove it — daily.”

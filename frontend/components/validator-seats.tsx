@@ -19,11 +19,11 @@ export function ValidatorSeat({
   const reduce = useReducedMotion();
   const ring =
     state === "agreed"
-      ? "border-real/70 shadow-[0_0_22px_rgba(43,255,136,0.25)]"
+      ? "border-real/70 shadow-[0_0_16px_rgba(59,154,217,0.25)]"
       : state === "dissented"
         ? "border-fake/70"
         : state === "deliberating"
-          ? "border-suspicious/60 shadow-[0_0_18px_rgba(255,176,32,0.18)]"
+          ? "border-suspicious/60 shadow-[0_0_12px_rgba(11,11,15,0.12)]"
           : "border-line";
 
   const glyph =
@@ -38,7 +38,7 @@ export function ValidatorSeat({
     >
       <div
         className={cn(
-          "relative flex h-9 w-9 items-center justify-center rounded-full border bg-black/50 transition-all duration-500 sm:h-14 sm:w-14",
+          "relative flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink/10 bg-white transition-all duration-500 sm:h-14 sm:w-14",
           ring
         )}
         aria-label={`Validator V-0${index + 1}: ${state}`}

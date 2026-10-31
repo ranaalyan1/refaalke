@@ -30,9 +30,9 @@ function Mugshot({
     >
       <Card className="overflow-hidden">
         {/* head plate */}
-        <div className="relative flex items-center gap-4 border-b border-line bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.025)_0_10px,transparent_10px_20px)] px-5 py-5">
+        <div className="relative flex items-center gap-4 border-b border-line bg-[repeating-linear-gradient(135deg,rgba(11,11,15,0.03)_0_10px,transparent_10px_20px)] px-5 py-5">
           {/* monogram mugshot frame */}
-          <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center border border-white/15 bg-black/60">
+          <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center border-2 border-ink/15 bg-fakesoft">
             <span className="text-[30px] font-medium leading-none text-ink/85">
               {c.name.slice(0, 1)}
             </span>

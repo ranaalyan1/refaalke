@@ -7,7 +7,6 @@ import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "@fontsource/jetbrains-mono/700.css";
 import "./globals.css";
-import { Grain } from "@/components/grain";
 import { Nav } from "@/components/nav";
 import { GameProvider } from "@/lib/game-state";
 
@@ -23,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#060607",
+  themeColor: "#FFFFFF",
   width: "device-width",
   initialScale: 1,
 };
@@ -33,7 +32,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-[100dvh] bg-bg text-ink antialiased">
         <GameProvider>
-          <Grain />
           <Nav />
           {children}
         </GameProvider>

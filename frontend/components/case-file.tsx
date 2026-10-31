@@ -83,7 +83,7 @@ export function CaseFile({ dossier }: { dossier: AgentDossier }) {
           </div>
 
           {/* services, monospace — the endpoints the jury will probe */}
-          <div className="mt-5 rounded-xl border border-line bg-black/40 p-3">
+          <div className="mt-5 rounded-xl border-2 border-ink/10 bg-surface p-3">
             <MonoLabel className="mb-2">declared service endpoints</MonoLabel>
             <div className="space-y-1">
               {dossier.services.map((s) => (

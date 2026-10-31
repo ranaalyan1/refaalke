@@ -1,5 +1,45 @@
 # RefAalke (formerly REAL or FAKE) — frontend build spec
 
+## v2 — "Sticker court" (current)
+
+> Full redesign: new logo, new UI/UX. Supersedes the noir v1 spec below
+> (kept for history). Palette lock: **baby blue · baby pink · white · black.**
+
+- **Mood (3 words):** pastel, playful, precise.
+- **Logo:** inline SVG mark in `components/logo.tsx` — a black-stroked
+  rounded square containing a tilting balance: baby-blue pan left, baby-pink
+  pan right. Wordmark "RefAalke" in Space Grotesk medium.
+- **Tokens (authoritative — `tailwind.config.ts`):**
+
+```css
+--bg: #FFFFFF;            /* first CSS rule on html,body */
+--surface: #F4FAFD;       /* baby-blue mist band */
+--pinkmist: #FDF2F7;      /* baby-pink mist band */
+--card: #FFFFFF;
+--ink: #0B0B0F;           /* black type + outlines */
+--real: #3B9AD9;          /* baby blue, readable depth  */
+--realsoft: #BFE3F7;
+--fake: #EB7BA6;          /* baby pink, readable depth  */
+--fakesoft: #F8C8DC;
+--line: rgba(11,11,15,0.12);
+```
+
+- **Materials:** sticker style — white cards, 2px black/10 outlines, radius
+  24, soft neutral shadow; buttons are pills with 2px black borders; the
+  only saturated color belongs to verdicts (REAL=blue, FAKE=pink) and the
+  pastel mist bands. No grain layer, no glows.
+- **Hero:** mouse-scrubbed pastel court illustration
+  (`public/court-pastel.mp4`, dense-keyframe H.264, object-position 85%
+  center) under a horizontal white wash + bottom-up white wash; blurred
+  intro label, typewriter line (38ms/char), pill actions — choreography
+  unchanged from the Mainframe-inspired hero.
+- **Motion:** v1 entrance language kept (blur-rise on
+  `cubic-bezier(0.22,1,0.36,1)`, reduced-motion honored).
+
+---
+
+## v1 — courtroom noir (retired)
+
 > Written before code, per the MotionSites skill workflow. Every element gets
 > real values. Build exactly this.
 

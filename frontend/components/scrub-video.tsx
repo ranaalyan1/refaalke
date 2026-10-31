@@ -79,10 +79,10 @@ export function ScrubVideo() {
   return (
     <video
       ref={videoRef}
-      className="fixed inset-0 z-0 h-full w-full object-cover opacity-90 [filter:brightness(0.62)_contrast(1.06)_saturate(0.92)]"
-      style={{ objectPosition: "70% center" }}
-      src="/court-scrub.mp4"
-      poster="/hero-courtroom.jpg"
+      className="fixed inset-0 z-0 h-full w-full object-cover"
+      style={{ objectPosition: "85% center" }}
+      src="/court-pastel.mp4"
+      poster="/court-pastel-poster.jpg"
       muted
       playsInline
       preload="auto"

@@ -58,7 +58,7 @@ export function GuessButtons() {
               onClick={() => choose(1)}
               aria-label="Guess FAKE — the agent is fake"
             >
-              <span aria-hidden className="h-2.5 w-2.5 rounded-full bg-white/80" />
+              <span aria-hidden className="h-2.5 w-2.5 rounded-full bg-black/70" />
               IT&apos;S FAKE
             </Button>
           </motion.div>
@@ -68,7 +68,7 @@ export function GuessButtons() {
             initial={reduce ? false : { opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.45, ease: EASE }}
-            className="flex flex-col items-center gap-4 rounded-[20px] border border-line bg-white/[0.04] px-5 py-5 text-center"
+            className="flex flex-col items-center gap-4 rounded-[20px] border-2 border-ink/10 bg-surface px-5 py-5 text-center"
           >
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/50">
               verdict filed · guess locked
@@ -87,7 +87,7 @@ export function GuessButtons() {
             </p>
             <Link
               href="/jury"
-              className="rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-black transition hover:bg-white active:scale-[0.97]"
+              className="rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-white transition hover:bg-real active:scale-[0.97]"
             >
               Enter the Jury Room →
             </Link>

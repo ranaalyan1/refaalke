@@ -106,9 +106,9 @@ export function VerdictStamp({
             className="flex h-40 w-40 items-center justify-center rounded-full border-[3px] border-real/80 sm:h-48 sm:w-48"
             style={{
               background:
-                "radial-gradient(circle at 34% 30%, rgba(43,255,136,0.35), rgba(43,255,136,0.08) 58%, rgba(43,255,136,0.22))",
+                "radial-gradient(circle at 34% 30%, rgba(191,227,247,0.9), rgba(191,227,247,0.45) 58%, rgba(59,154,217,0.35))",
               boxShadow:
-                "0 0 60px rgba(43,255,136,0.35), inset 0 0 34px rgba(43,255,136,0.28)",
+                "0 10px 34px rgba(59,154,217,0.25), inset 0 0 24px rgba(59,154,217,0.14)",
             }}
           >
             <div className="flex h-[86%] w-[86%] flex-col items-center justify-center rounded-full border border-dashed border-real/70">
@@ -116,7 +116,7 @@ export function VerdictStamp({
                 className={cn(
                   "text-[44px] font-bold leading-none tracking-[-0.02em] text-real sm:text-[54px]"
                 )}
-                style={{ textShadow: "0 4px 22px rgba(43,255,136,0.5)" }}
+                style={{ textShadow: "0 2px 10px rgba(59,154,217,0.3)" }}
               >
                 REAL
               </span>
@@ -137,9 +137,9 @@ export function VerdictStamp({
           )}
           style={{
             boxShadow: isFake
-              ? "0 0 55px rgba(255,69,58,0.32), inset 0 0 26px rgba(255,69,58,0.18)"
+              ? "0 10px 30px rgba(235,123,166,0.28), inset 0 0 22px rgba(235,123,166,0.16)"
               : isSusp
-                ? "0 0 45px rgba(255,176,32,0.25)"
+                ? "0 8px 24px rgba(11,11,15,0.14)"
                 : "none",
           }}
         >

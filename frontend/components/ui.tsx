@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 
-/** shadcn/ui-idiom primitives, hand-rolled to the project's design tokens. */
+/** shadcn/ui-idiom primitives — RefAalke v2 sticker-court style. */
 
 type BtnVariant = "real" | "fake" | "solid" | "ghost";
 
@@ -10,12 +10,12 @@ export const Button = forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant }
 >(function Button({ className, variant = "solid", ...props }, ref) {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-[transform,background-color,color,box-shadow] duration-200 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 min-h-[44px]";
+    "inline-flex items-center justify-center gap-2 rounded-full border-2 font-medium transition-[transform,background-color,color,border-color] duration-200 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 min-h-[44px]";
   const variants: Record<BtnVariant, string> = {
-    real: "bg-real text-black hover:shadow-[0_0_28px_rgba(43,255,136,0.35)]",
-    fake: "bg-fake text-white hover:shadow-[0_0_28px_rgba(255,69,58,0.35)]",
-    solid: "bg-ink text-black hover:bg-white",
-    ghost: "border border-line text-ink hover:bg-white/[0.06]",
+    real: "bg-realsoft text-ink border-ink hover:bg-real hover:text-white",
+    fake: "bg-fakesoft text-ink border-ink hover:bg-fake hover:text-white",
+    solid: "bg-ink text-white border-ink hover:bg-real hover:border-real",
+    ghost: "border-ink/20 text-ink hover:border-ink hover:bg-ink hover:text-white",
   };
   return (
     <button
@@ -36,11 +36,11 @@ export function Badge({
   children: React.ReactNode;
 }) {
   const tones = {
-    neutral: "border-line bg-white/[0.04] text-ink/70",
-    cold: "border-cold/30 bg-cold/10 text-cold",
-    real: "border-real/30 bg-real/10 text-real",
-    fake: "border-fake/30 bg-fake/10 text-fake",
-    suspicious: "border-suspicious/30 bg-suspicious/10 text-suspicious",
+    neutral: "border-ink/15 bg-surface text-ink/70",
+    cold: "border-ink/25 bg-realsoft text-ink",
+    real: "border-real/50 bg-realsoft text-real",
+    fake: "border-fake/50 bg-fakesoft text-fake",
+    suspicious: "border-ink/40 bg-ink/10 text-ink",
   } as const;
   return (
     <span
@@ -63,7 +63,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-[20px] border border-line bg-card",
+        "rounded-[24px] border-2 border-ink/10 bg-card shadow-[0_6px_24px_rgba(11,11,15,0.06)]",
         className
       )}
       {...rest}

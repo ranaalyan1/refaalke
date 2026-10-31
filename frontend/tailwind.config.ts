@@ -1,25 +1,33 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * RefAalke v2 — "sticker court"
+ * Palette lock: baby blue · baby pink · white · black.
+ * Pastel fills, black outlines, black type. Verdicts carry the only color.
+ */
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./lib/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        bg: "#060607",
-        surface: "#0b0b0e",
-        card: "#101014",
-        ink: "#EDEBE4",
-        real: "#2BFF88",
-        fake: "#FF453A",
-        suspicious: "#FFB020",
-        cold: "#67E8F9",
+        bg: "#FFFFFF",
+        surface: "#F4FAFD", // baby-blue mist
+        pinkmist: "#FDF2F7", // baby-pink mist (section tints)
+        card: "#FFFFFF",
+        ink: "#0B0B0F", // black
+        real: "#3B9AD9", // baby blue (readable depth)
+        realsoft: "#BFE3F7",
+        fake: "#EB7BA6", // baby pink (readable depth)
+        fakesoft: "#F8C8DC",
+        suspicious: "#0B0B0F", // black — the jury is still deciding
+        cold: "#0B0B0F", // utility mono-label color
       },
       fontFamily: {
         sans: ["'Space Grotesk'", "system-ui", "sans-serif"],
         mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
       },
       borderColor: {
-        line: "rgba(255,255,255,0.08)",
+        line: "rgba(11,11,15,0.12)",
       },
       keyframes: {
         shake: {

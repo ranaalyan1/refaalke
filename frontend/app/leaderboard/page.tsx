@@ -100,8 +100,8 @@ export default function LeaderboardPage() {
                 viewport={{ once: true }}
                 transition={{ delay: Math.min(i * 0.05, 0.4) }}
                 className={cn(
-                  "grid grid-cols-[44px_1fr_64px_64px_64px] items-center gap-2 border-b border-line/60 px-5 py-3.5 last:border-0 hover:bg-white/[0.03] sm:grid-cols-[56px_1fr_80px_80px_80px]",
-                  i < 3 && "bg-white/[0.02]"
+                  "grid grid-cols-[44px_1fr_64px_64px_64px] items-center gap-2 border-b border-line/60 px-5 py-3.5 last:border-0 hover:bg-surface sm:grid-cols-[56px_1fr_80px_80px_80px]",
+                  i < 3 && "bg-pinkmist"
                 )}
               >
                 <span

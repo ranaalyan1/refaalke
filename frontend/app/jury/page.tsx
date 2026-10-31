@@ -226,14 +226,14 @@ export default function JuryPage() {
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/"
-                  className="rounded-full border border-line px-5 py-2.5 text-[14px] transition hover:bg-white/[0.06]"
+                  className="rounded-full border-2 border-ink/15 px-5 py-2.5 text-[14px] transition hover:bg-surface hover:border-ink/30"
                 >
                   ← Back to today&apos;s case
                 </Link>
                 {!filed && (
                   <Link
                     href="/"
-                    className="rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-black"
+                    className="rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-white transition hover:bg-real"
                   >
                     File a guess
                   </Link>
@@ -352,19 +352,19 @@ export default function JuryPage() {
                     <div className="mt-7 flex flex-wrap justify-center gap-3">
                       <Link
                         href="/stats"
-                        className="rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-black transition hover:bg-white"
+                        className="rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-white transition hover:bg-real"
                       >
                         Share the verdict
                       </Link>
                       <Link
                         href="/shame"
-                        className="rounded-full border border-line px-5 py-2.5 text-[14px] transition hover:bg-white/[0.06]"
+                        className="rounded-full border-2 border-ink/15 px-5 py-2.5 text-[14px] transition hover:bg-surface hover:border-ink/30"
                       >
                         Hall of Shame
                       </Link>
                       <Link
                         href="/"
-                        className="rounded-full border border-line px-5 py-2.5 text-[14px] transition hover:bg-white/[0.06]"
+                        className="rounded-full border-2 border-ink/15 px-5 py-2.5 text-[14px] transition hover:bg-surface hover:border-ink/30"
                       >
                         Back to today
                       </Link>

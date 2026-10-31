@@ -78,11 +78,11 @@ export default function HomePage() {
         {/* mouse-scrubbed court video (no autoplay; poster = still frame) */}
         <ScrubVideo />
 
-        {/* scrims: type zone dark on the left, bottom fade into the page */}
+        {/* scrims: white wash on the type side, bottom fade into the page */}
         <div aria-hidden className="absolute inset-0 z-[1]">
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,#060607_8%,rgba(6,6,7,0.78)_48%,rgba(6,6,7,0.34)_100%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(180deg,transparent,#060607)]" />
-          <div className="ambient absolute inset-0" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.97)_0%,rgba(255,255,255,0.9)_40%,rgba(255,255,255,0.4)_64%,rgba(255,255,255,0)_84%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-[65%] bg-[linear-gradient(180deg,transparent_0%,rgba(255,255,255,0.92)_55%,#FFFFFF_100%)]" />
+          <div className="ambient absolute inset-0 opacity-60" />
         </div>
 
         <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col justify-end px-4 pb-14 pt-32 sm:px-6 sm:pb-20 md:justify-center md:pb-0">
@@ -105,7 +105,7 @@ export default function HomePage() {
               fontSize: "clamp(18px, 4vw, 26px)",
               lineHeight: 1.3,
               fontWeight: 400,
-              color: "#EDEBE4",
+              color: "#0B0B0F",
               filter: "blur(4px)",
             }}
             aria-hidden
@@ -148,13 +148,13 @@ export default function HomePage() {
           >
             <a
               href="#today"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-ink/10 bg-ink px-4 py-[0.45em] text-[13px] text-bg transition-colors duration-200 hover:bg-transparent hover:text-ink sm:px-5 sm:text-[15px]"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-full border-2 border-ink bg-ink px-4 py-[0.45em] text-[13px] text-white transition-colors duration-200 hover:bg-real hover:border-real sm:px-5 sm:text-[15px]"
             >
               Lock in a guess&nbsp;→
             </a>
             <a
               href="#today"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-ink/25 bg-transparent px-4 py-[0.45em] text-[13px] text-ink transition-colors duration-200 hover:bg-ink hover:text-bg sm:px-5 sm:text-[15px]"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-full border-2 border-ink/25 bg-white px-4 py-[0.45em] text-[13px] text-ink transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-white sm:px-5 sm:text-[15px]"
             >
               How this court works&nbsp;→
             </a>

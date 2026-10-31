@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 const CELL: Record<number, { emoji: string; cls: string; label: string }> = {
   0: { emoji: "🟩", cls: "border-real/50 bg-real/15", label: "caught" },
   1: { emoji: "🟥", cls: "border-fake/50 bg-fake/15", label: "fooled" },
-  2: { emoji: "⬜", cls: "border-line bg-white/[0.04]", label: "missed / replay" },
+  2: { emoji: "⬜", cls: "border-line bg-surface", label: "missed / replay" },
 };
 
 function StatBlock({
@@ -57,48 +57,48 @@ function drawShareCard(streak: number, wins: number, grid: number[]): string {
   const sans = (s: number, w = 500) => `${w} ${s}px 'Space Grotesk', sans-serif`;
 
   // background + ambient glow
-  ctx.fillStyle = "#0b0b0e";
+  ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, 1200, 630);
   const g = ctx.createRadialGradient(600, -100, 60, 600, -100, 700);
-  g.addColorStop(0, "rgba(255,255,255,0.06)");
+  g.addColorStop(0, "rgba(191,227,247,0.55)");
   g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 1200, 630);
 
-  ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  ctx.strokeStyle = "rgba(11,11,15,0.12)";
   ctx.lineWidth = 2;
   ctx.strokeRect(18, 18, 1164, 594);
 
   // eyebrow
-  ctx.fillStyle = "#67E8F9";
+  ctx.fillStyle = "#3B9AD9";
   ctx.font = mono(20, 500);
   ctx.fillText("REFAALKE — AI AGENT COURT · GENLAYER", 64, 92);
 
   // headline (two lines)
-  ctx.fillStyle = "#EDEBE4";
+  ctx.fillStyle = "#0B0B0F";
   ctx.font = sans(64, 500);
   ctx.fillText("I out-judged the", 64, 196);
-  ctx.fillStyle = "rgba(237,235,228,0.5)";
+  ctx.fillStyle = "rgba(11,11,15,0.4)";
   ctx.fillText("AI jury.", 64, 268);
 
   // streak + wins
-  ctx.fillStyle = "#FFB020";
+  ctx.fillStyle = "#EB7BA6";
   ctx.font = sans(44, 500);
   ctx.fillText(`🔥 ${streak}-day streak`, 64, 354);
-  ctx.fillStyle = "rgba(237,235,228,0.75)";
+  ctx.fillStyle = "rgba(11,11,15,0.7)";
   ctx.font = sans(30, 400);
   ctx.fillText(`${wins} scammers caught · day 47`, 64, 404);
 
   // wordle grid — right column
   const cell = 62, gap = 12, x0 = 760, y0 = 150;
-  const colors: Record<number, string> = { 0: "#2BFF88", 1: "#FF453A", 2: "rgba(255,255,255,0.14)" };
+  const colors: Record<number, string> = { 0: "#BFE3F7", 1: "#F8C8DC", 2: "rgba(11,11,15,0.08)" };
   grid.forEach((r, i) => {
     const x = x0 + (i % 4) * (cell + gap);
     const y = y0 + Math.floor(i / 4) * (cell + gap);
     ctx.fillStyle = colors[r] ?? colors[2];
     roundRect(ctx, x, y, cell, cell, 10);
     ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+    ctx.strokeStyle = "rgba(11,11,15,0.2)";
     ctx.lineWidth = 1.5;
     roundRect(ctx, x, y, cell, cell, 10);
     ctx.stroke();
@@ -106,7 +106,7 @@ function drawShareCard(streak: number, wins: number, grid: number[]): string {
 
   // legend
   ctx.font = mono(16, 400);
-  ctx.fillStyle = "rgba(237,235,228,0.45)";
+  ctx.fillStyle = "rgba(11,11,15,0.45)";
   ctx.fillText("🟩 caught   🟥 fooled   ⬜ missed", x0, y0 + 2 * (cell + gap) + 34);
 
   // footer
@@ -272,7 +272,7 @@ export default function StatsPage() {
           <Rise delay={0.26}>
             <Card className="p-6">
               <MonoLabel>share card</MonoLabel>
-              <div className="mt-4 overflow-hidden rounded-xl border border-line bg-black">
+              <div className="mt-4 overflow-hidden rounded-xl border-2 border-ink/10 bg-surface">
                 {png ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={png} alt="Share card preview" className="block w-full" />
@@ -313,7 +313,7 @@ export default function StatsPage() {
               </p>
               <Link
                 href="/"
-                className="mt-5 inline-block rounded-full bg-ink px-6 py-2.5 text-[14px] font-medium text-black"
+                className="mt-5 inline-block rounded-full bg-ink px-6 py-2.5 text-[14px] font-medium text-white transition hover:bg-real"
               >
                 Go to today&apos;s case
               </Link>

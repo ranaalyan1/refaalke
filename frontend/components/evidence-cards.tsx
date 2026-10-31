@@ -34,7 +34,7 @@ export function EvidenceCard({
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.55, ease: EASE }}
       className={cn(
-        "flex items-start gap-3 rounded-[14px] border border-line bg-black/45 px-4 py-3"
+        "flex items-start gap-3 rounded-[14px] border-2 border-ink/10 bg-surface px-4 py-3"
       )}
     >
       <span aria-hidden className="mt-[1px] text-[15px]">
