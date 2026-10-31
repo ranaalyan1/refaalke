@@ -1,0 +1,90 @@
+/* ------------------------------------------------------------------ *
+ * FIRST RULE — page background on html,body: no white flash on load.  *
+ * ------------------------------------------------------------------ */
+html,
+body {
+  background: #060607;
+  color: #edebe4;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #060607;
+  --surface: #0b0b0e;
+  --card: #101014;
+  --line: rgba(255, 255, 255, 0.08);
+  --fg: #edebe4;
+  --fg-80: rgba(237, 235, 228, 0.8);
+  --fg-55: rgba(237, 235, 228, 0.55);
+  --fg-35: rgba(237, 235, 228, 0.35);
+  --real: #2bff88;
+  --fake: #ff453a;
+  --suspicious: #ffb020;
+  --cold: #67e8f9;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  min-height: 100dvh;
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* mono micro-label system (11px, uppercase, tracked) */
+.label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--fg-55);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ambient top light — depth, never a blob */
+.ambient {
+  background: radial-gradient(
+    ellipse 80% 50% at 50% -10%,
+    rgba(255, 255, 255, 0.035),
+    transparent 70%
+  );
+}
+
+/* focus states stay visible */
+button:focus-visible,
+a:focus-visible {
+  outline: 1px solid rgba(103, 232, 249, 0.7);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -110,6 +110,7 @@ async function writeContract(functionName: string, args: unknown[]): Promise<str
     address: CONFIG.contractAddress,
     functionName,
     args,
+    value: 0n,
   });
   const receipt = await client.waitForTransactionReceipt({
     hash,
