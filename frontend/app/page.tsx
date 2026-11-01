@@ -1,0 +1,234 @@
+"use client";
+/**
+ * Home / TODAY'S CASE — the daily hook.
+ * Full-screen noir hero: mouse-scrubbed court video, blurred intro label,
+ * typewriter line, pill actions (Mainframe-inspired choreography, court
+ * voice). The docket and the two-button choice follow below the fold.
+ */
+import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { CaseFile } from "@/components/case-file";
+import { GuessButtons } from "@/components/guess-buttons";
+import { MonoLabel, EASE } from "@/components/motion";
+import { ScrubVideo } from "@/components/scrub-video";
+import { Badge } from "@/components/ui";
+import { useGame } from "@/lib/game-state";
+import { formatCountdown, msUntilJuryTime } from "@/lib/utils";
+import { fetchRegisteredCount, REGISTRY_LINK } from "@/lib/base";
+import { IS_DEMO } from "@/lib/contract";
+import { useTypewriter } from "@/lib/use-typewriter";
+
+function CountdownChip() {
+  const [left, setLeft] = useState<number | null>(null);
+  useEffect(() => {
+    setLeft(msUntilJuryTime());
+    const t = setInterval(() => setLeft(msUntilJuryTime()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-suspicious/30 bg-suspicious/[0.07] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-suspicious/90">
+      <span className="h-1.5 w-1.5 animate-pulseDot rounded-full bg-suspicious" />
+      jury decides in {left === null ? "--:--:--" : formatCountdown(left)}
+    </span>
+  );
+}
+
+function Ticker() {
+  const [n, setN] = useState<number | null>(null);
+  useEffect(() => {
+    fetchRegisteredCount().then(setN);
+  }, []);
+  return (
+    <a
+      href={REGISTRY_LINK}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink/45 transition hover:text-ink/80"
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-real" />
+      {n !== null
+        ? `${n.toLocaleString()} agents registered on Base — only 3–15% functional`
+        : "reading ERC-8004 registry…"}
+      <span aria-hidden>↗</span>
+    </a>
+  );
+}
+
+const TYPE_TEXT =
+  "Glad you stopped in. The evidence is live and the validators are already watching. Now, what does the evidence say?";
+
+export default function HomePage() {
+  const { dossier } = useGame();
+  const reduce = useReducedMotion();
+  const { displayed, done } = useTypewriter(TYPE_TEXT);
+
+  const anim = (delay: number) =>
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y: 24, filter: "blur(8px)" },
+          animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+          transition: { duration: 0.85, ease: EASE, delay },
+        };
+
+  return (
+    <main>
+      {/* ---------------- HERO — Mainframe-inspired choreography ---------------- */}
+      <section className="relative flex h-[100svh] min-h-[560px] flex-col overflow-hidden">
+        {/* mouse-scrubbed court video (no autoplay; poster = still frame) */}
+        <ScrubVideo />
+
+        {/* scrims: white wash on the type side, bottom fade into the page */}
+        <div aria-hidden className="absolute inset-0 z-[1]">
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.97)_0%,rgba(255,255,255,0.9)_40%,rgba(255,255,255,0.4)_64%,rgba(255,255,255,0)_84%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-[65%] bg-[linear-gradient(180deg,transparent_0%,rgba(255,255,255,0.92)_55%,#FFFFFF_100%)]" />
+          <div className="ambient absolute inset-0 opacity-60" />
+        </div>
+
+        <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col justify-end px-4 pb-14 pt-32 sm:px-6 sm:pb-20 md:justify-center md:pb-0">
+          <h1 className="sr-only">
+            RefAalke — the AI agent court
+          </h1>
+
+          {/* blurred intro label — own motion props so the entrance y-slide
+              never overwrites the persistent blur(4px) via filter tweening */}
+          <motion.div
+            {...(reduce
+              ? {}
+              : {
+                  initial: { opacity: 0, y: 16 },
+                  animate: { opacity: 1, y: 0 },
+                  transition: { duration: 0.85, ease: EASE, delay: 0.05 },
+                })}
+            className="pointer-events-none mb-5 select-none sm:mb-6"
+            style={{
+              fontSize: "clamp(18px, 4vw, 26px)",
+              lineHeight: 1.3,
+              fontWeight: 400,
+              color: "#0B0B0F",
+              filter: "blur(4px)",
+            }}
+            aria-hidden
+          >
+            Hey there, welcome to Agent Court,
+            <br />
+            Live evidence, independent validators, one daily verdict
+          </motion.div>
+
+          {/* typewriter */}
+          <motion.p
+            {...anim(0.15)}
+            className="mb-5 max-w-[52ch] text-ink sm:mb-6"
+            style={{
+              fontSize: "clamp(18px, 4vw, 26px)",
+              lineHeight: 1.35,
+              fontWeight: 400,
+              minHeight: "54px",
+            }}
+          >
+            {displayed}
+            {!done && (
+              <span
+                className="cursor-blink ml-[2px] inline-block h-[1.1em] w-[2px] bg-ink align-middle"
+                aria-hidden
+              />
+            )}
+          </motion.p>
+
+          {/* action pills — independent 400ms entrance */}
+          <motion.div
+            {...(reduce
+              ? {}
+              : {
+                  initial: { opacity: 0, y: 8 },
+                  animate: { opacity: 1, y: 0 },
+                  transition: { duration: 0.4, ease: EASE, delay: 0.4 },
+                })}
+            className="flex flex-wrap items-center gap-x-1 gap-y-2"
+          >
+            <a
+              href="#today"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-full border-2 border-ink bg-ink px-4 py-[0.45em] text-[13px] text-white transition-colors duration-200 hover:bg-real hover:border-real sm:px-5 sm:text-[15px]"
+            >
+              Lock in a guess&nbsp;→
+            </a>
+            <a
+              href="#today"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-full border-2 border-ink/25 bg-white px-4 py-[0.45em] text-[13px] text-ink transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-white sm:px-5 sm:text-[15px]"
+            >
+              How this court works&nbsp;→
+            </a>
+          </motion.div>
+
+          <motion.div
+            {...anim(0.55)}
+            className="mt-6 flex flex-wrap items-center gap-3"
+          >
+            <CountdownChip />
+            <Badge tone="cold">verdict = evidence, not vibes</Badge>
+          </motion.div>
+
+          <motion.div {...anim(0.68)} className="mt-5">
+            <Ticker />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ---------------- TODAY'S CASE ---------------- */}
+      <section className="relative border-t border-line bg-bg">
+        <div className="ambient absolute inset-0" />
+        <div className="relative mx-auto grid w-full max-w-6xl grid-cols-1 gap-8 px-4 py-16 sm:px-6 md:grid-cols-[1.15fr_0.85fr] md:py-24">
+          <div>
+            <MonoLabel>01 — today&apos;s defendant</MonoLabel>
+            <CaseFile dossier={dossier} />
+          </div>
+
+          <div className="flex flex-col justify-center">
+            <MonoLabel>02 — file your verdict</MonoLabel>
+            <h2 className="mt-3 text-[clamp(30px,4.4vw,46px)] font-medium leading-[1.02] tracking-[-0.03em]">
+              Real — <span className="text-ink/45">or fake?</span>
+            </h2>
+            <p className="mt-3 max-w-[40ch] text-[15px] leading-relaxed text-ink/55">
+              Trust the shiny 97/100 badge, or your read of the room? The jury
+              re-fetches registration files, endpoints, reviewer graphs and payment
+              proofs — live, inside consensus.
+            </p>
+            <div className="mt-7">
+              <GuessButtons />
+            </div>
+
+            {/* how it works — quiet strip */}
+            <ol className="mt-10 space-y-3 border-t border-line pt-6">
+              {[
+                ["01", "Commit", "Indexer picks today's agent, pins evidence to IPFS, commits on-chain before guesses open."],
+                ["02", "Deliberate", "Leader + every validator re-run the E1–E5 evidence pipeline from scratch."],
+                ["03", "Stamps", "Verdict lands: streaks settle, scammers enter the Hall of Shame."],
+              ].map(([n, t, d]) => (
+                <li key={n} className="flex gap-4">
+                  <span className="label mt-1 w-6 shrink-0 text-cold/70">{n}</span>
+                  <div>
+                    <p className="text-[14px] font-medium text-ink/90">{t}</p>
+                    <p className="max-w-[52ch] text-[13px] leading-relaxed text-ink/50">{d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- FOOTER ---------------- */}
+      <footer className="border-t border-line px-4 py-10 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink/40">
+            RefAalke — the AI agent court · built on GenLayer
+          </p>
+          <p className="max-w-[52ch] text-[12px] leading-relaxed text-ink/35">
+            A daily game, and a Validation layer the ERC-8004 standard hasn&apos;t
+            shipped yet. {IS_DEMO ? "Demo mode: fixtures are used until a contract is configured." : ""}
+          </p>
+        </div>
+      </footer>
+    </main>
+  );
+}

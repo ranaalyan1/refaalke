@@ -1,0 +1,29 @@
+{
+  "name": "refaalke-indexer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Off-chain indexer for RefAalke \u2014 ERC-8004 candidate pool, daily evidence snapshots, verdict keeper",
+  "type": "module",
+  "scripts": {
+    "pool": "tsx src/index.ts pool",
+    "snapshot": "tsx src/index.ts snapshot",
+    "verdict": "tsx src/index.ts verdict",
+    "schedule": "tsx src/index.ts schedule",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "genlayer-js": "^1.1.8",
+    "node-cron": "^3.0.3",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}
