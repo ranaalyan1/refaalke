@@ -1102,11 +1102,14 @@ class AgentCourt(gl.Contract):
             raise Exception("day not open")
         self.day_status[day] = u8(DAY_JUDGING)
 
-        # R6: snapshot the storage the nondet round needs into memory first.
-        cases_mem = gl.storage.copy_to_memory(self.daily_cases)
+        # R6 compliance intent: do NOT copy the whole (unbounded) daily_cases
+        # TreeMap into memory — read only this day's record BEFORE the
+        # nondet round and bind plain int/str values, so no storage refs
+        # cross the run_nondet_unsafe boundary.
+        case = self.daily_cases[day]
+        agent_id_i = to_int(case.agent_id)
+        snapshot_uri_s = str(case.snapshot_uri)
         day_u = u256(day)
-        agent_id_i = to_int(cases_mem[day_u].agent_id)
-        snapshot_uri_s = str(cases_mem[day_u].snapshot_uri)
 
         def leader_fn() -> str:
             # Fresh pipeline; every fetch and the LLM call happen inside the
