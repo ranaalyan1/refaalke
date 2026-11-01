@@ -301,3 +301,37 @@ assert used == 4, "leader+validator x (garbage then valid) = 4 prompts, got %d" 
 vr = json.loads(c.get_verdict(DAYR))
 assert vr["verdict"] == "FAKE" and vr["score"] == 24, "re-prompt result must be used: " + str(vr)
 print("JSON RETRY PASSED (malformed output re-prompted exactly once per run)")
+
+# ================= Crowd vs Jury: basis-point tally ========================
+CHAIN["timestamp"] += 86400
+DAYC = mod.u256(CHAIN["timestamp"] // 86400)
+P4 = "0x" + "04" * 20
+
+def crowd_prompt(prompt, response_format=None):
+    return {"verdict": "FAKE", "score": 22,
+            "reasoning": "endpoints 404; 5 feedback rows across 3 reviewers; "
+                         "sybil cluster 6667 bp; 1 of 5 spot-checked proofs",
+            "evidence": []}
+
+gstub.gl.nondet.web.get = staticmethod(alive_get)
+gstub.gl.nondet.exec_prompt = staticmethod(crowd_prompt)
+gstub.gl.message.sender_address = OWNER
+c.commit_daily_case(DAYC, mod.u256(42), mod.u256(8453), "ipfs://QmCase123")
+for p in (P1, P2, P3):
+    gstub.gl.message.sender_address = p
+    c.submit_guess(DAYC, mod.u8(0))     # REAL x3
+gstub.gl.message.sender_address = P4
+c.submit_guess(DAYC, mod.u8(1))         # FAKE x1
+
+crowd_open = json.loads(c.get_crowd(DAYC))
+assert crowd_open["real"] == 0 and crowd_open["fake"] == 0, \
+    "tally must be written at settlement, not at guess time: " + str(crowd_open)
+
+c.run_verdict(DAYC)
+crowd = json.loads(c.get_crowd(DAYC))
+assert crowd["real"] == 3 and crowd["fake"] == 1, crowd
+assert crowd["realBp"] == 7500 and crowd["fakeBp"] == 2500, crowd
+assert json.loads(c.get_verdict(DAYC))["verdict"] == "FAKE"   # jury beat the crowd
+empty = json.loads(c.get_crowd(mod.u256(999999)))
+assert empty["real"] == 0 and empty["fake"] == 0 and empty["realBp"] == 0, empty
+print("CROWD vs JURY PASSED (3 REAL / 1 FAKE => realBp 7500)")

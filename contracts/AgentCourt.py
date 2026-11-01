@@ -952,6 +952,9 @@ class AgentCourt(gl.Contract):
     day_guessers: TreeMap[u256, DynArray[Address]]
     # Replay tokens granted when a day settled UNDETERMINED (no streak damage).
     replay_tokens: TreeMap[Address, u256]
+    # Crowd tally per day — "wisdom of the crowd" vs the jury verdict.
+    crowd_real: TreeMap[u256, u256]
+    crowd_fake: TreeMap[u256, u256]
     owner: Address
 
     def __init__(self, owner: Address):
@@ -962,6 +965,8 @@ class AgentCourt(gl.Contract):
         self.day_status = TreeMap()
         self.day_guessers = TreeMap()
         self.replay_tokens = TreeMap()
+        self.crowd_real = TreeMap()
+        self.crowd_fake = TreeMap()
         self.owner = owner
 
     # ------------------------------------------------------------------
@@ -1008,8 +1013,14 @@ class AgentCourt(gl.Contract):
         if day not in self.day_guessers:
             return
         guessers = self.day_guessers[day]
+        crowd_real_n = 0
+        crowd_fake_n = 0
         for player in guessers:
             g = to_int(self.guesses[player][day])
+            if g == GUESS_REAL:
+                crowd_real_n = crowd_real_n + 1
+            elif g == GUESS_FAKE:
+                crowd_fake_n = crowd_fake_n + 1
             stats = self.player_stats[player]
             if verdict == VERDICT_UNDETERMINED:
                 self.replay_tokens[player] = u256(to_int(self.replay_tokens.get(player, 0)) + 1)
@@ -1029,6 +1040,8 @@ class AgentCourt(gl.Contract):
                 stats.streak = u256(0)
             stats.games = u256(to_int(stats.games) + 1)
             self.player_stats[player] = stats
+        self.crowd_real[day] = u256(crowd_real_n)
+        self.crowd_fake[day] = u256(crowd_fake_n)
 
     # ------------------------------------------------------------------
     # Write functions
@@ -1251,6 +1264,24 @@ class AgentCourt(gl.Contract):
         g = to_int(pg[day])
         return json.dumps({"exists": True, "guess": g,
                            "guessLabel": "REAL" if g == GUESS_REAL else "FAKE"})
+
+    @gl.public.view
+    def get_crowd(self, day: u256) -> str:
+        """
+        Crowd vs Jury: REAL/FAKE guess counts for the day and their shares
+        in basis points (integer math only — R5).
+        """
+        real_n = to_int(self.crowd_real.get(day, 0))
+        fake_n = to_int(self.crowd_fake.get(day, 0))
+        total = real_n + fake_n
+        if total > 0:
+            real_bp = real_n * BP // total
+            fake_bp = fake_n * BP // total
+        else:
+            real_bp = 0
+            fake_bp = 0
+        return json.dumps({"day": to_int(day), "real": real_n, "fake": fake_n,
+                           "realBp": real_bp, "fakeBp": fake_bp})
 
     @gl.public.view
     def get_leaderboard(self, top_n: u256) -> str:
