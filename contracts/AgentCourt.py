@@ -57,10 +57,12 @@ VALIDATOR RE-DERIVATION DESIGN (R2, R3, R4)
 * R8 — the comparison logic below (citation counting, band check, enum match)
   is pure, deterministic, integer-only: no LLM calls, no fetches, no random.
 * Integer determinism (R5): scores are integers 0–100, shares are basis
-  points, no floats anywhere in consensus-reachable code.
+  points; transient parses are immediately floored — floats are never
+  stored or compared.
 * Storage discipline (R6): TreeMap for every keyed lookup, @allow_storage
-  dataclasses for records, gl.storage.copy_to_memory before entering
-  run_nondet_unsafe, views return str via json.dumps.
+  dataclasses for records, plain int/str values bound before entering
+  run_nondet_unsafe (no storage refs cross the boundary; the unbounded
+  daily_cases map is never bulk-copied), views return str via json.dumps.
 * Verdicts are consequences, not wagers (R7): no odds, no payouts — a fixed
   scoring rule for player points only.
 * Flapping evidence (endpoint timeouts, explorer rate limits) is absorbed by
@@ -193,7 +195,7 @@ def clamp_score(x: int) -> int:
 
 
 def to_hex32(n: int) -> str:
-    """32-byte little... no: big-endian hex string of a uint256 (64 chars)."""
+    """Big-endian 64-char hex of a uint256."""
     h = ""
     v = n
     for _ in range(64):
