@@ -662,34 +662,22 @@ def build_rubric_prompt(agent_name: str, agent_desc: str, reg: dict,
     )
 
 
-def e5_llm_judgment(prompt: str) -> dict:
+def _normalize_judgment(raw) -> dict:
     """
-    LLM JUDGMENT: one call with the fixed rubric; on malformed JSON, one
-    re-prompt demanding ONLY valid JSON; then UNDETERMINED. Never crashes the
-    consensus round. Score clamped 0-100; verdict forced into the enum.
+    Parse and validate one LLM attempt. Returns a clean judgment dict, or
+    None when the output is unusable (malformed JSON, not a dict, or a
+    verdict outside the enum) — None tells the caller to re-prompt.
     """
-    raw = None
-    for attempt in range(2):
-        try:
-            p = prompt if attempt == 0 else prompt + "\n\nREMINDER: output ONLY valid JSON. No prose, no markdown."
-            raw = gl.nondet.exec_prompt(p, response_format="json")
-            break
-        except Exception:
-            raw = None
-    if raw is None:
-        return {"verdict": VERDICT_UNDETERMINED, "score": 0,
-                "reasoning": "LLM judgment unavailable.", "evidence": []}
     try:
         if isinstance(raw, str):
             raw = json.loads(raw)
     except Exception:
-        raw = None
+        return None
     if not isinstance(raw, dict):
-        return {"verdict": VERDICT_UNDETERMINED, "score": 0,
-                "reasoning": "LLM returned malformed JSON twice.", "evidence": []}
-    verdict = str(safe_get(raw, "verdict", VERDICT_UNDETERMINED)).upper()
+        return None
+    verdict = str(safe_get(raw, "verdict", "")).upper()
     if verdict not in (VERDICT_REAL, VERDICT_SUSPICIOUS, VERDICT_FAKE, VERDICT_UNDETERMINED):
-        verdict = VERDICT_UNDETERMINED
+        return None
     score = clamp_score(to_int(safe_get(raw, "score", 0)))
     reasoning = trunc(str(safe_get(raw, "reasoning", "")), 500)
     evidence = safe_get(raw, "evidence", [])
@@ -697,6 +685,27 @@ def e5_llm_judgment(prompt: str) -> dict:
         evidence = []
     return {"verdict": verdict, "score": score, "reasoning": reasoning,
             "evidence": evidence}
+
+
+def e5_llm_judgment(prompt: str) -> dict:
+    """
+    LLM JUDGMENT: one call with the fixed rubric; on malformed output (bad
+    JSON OR a raised error), ONE re-prompt demanding ONLY valid JSON; then
+    UNDETERMINED. Never crashes the consensus round. Score clamped 0-100;
+    verdict forced into the enum by _normalize_judgment.
+    """
+    for attempt in range(2):
+        p = prompt if attempt == 0 else prompt + "\n\nREMINDER: output ONLY valid JSON. No prose, no markdown."
+        try:
+            raw = gl.nondet.exec_prompt(p, response_format="json")
+        except Exception:
+            continue
+        norm = _normalize_judgment(raw)
+        if norm is not None:
+            return norm
+    return {"verdict": VERDICT_UNDETERMINED, "score": 0,
+            "reasoning": "LLM returned unusable output after one re-prompt.",
+            "evidence": []}
 
 
 def evidence_digest_json(e1: dict, reg: dict, endpoints: list, metrics: dict,
