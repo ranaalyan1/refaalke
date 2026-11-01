@@ -225,3 +225,35 @@ except AssertionError:
     # day_status must be left rejected so a corrected round can be retried
     # (stub raised inside run_nondet_unsafe; status remains judging=1 here)
 print("R4 ENFORCEMENT PASSED")
+
+# ================= Forced-FAKE safety net carries a FAKE score ==============
+# Dead identity (tokenURI resolves empty) + feedback in the snapshot, while
+# the LLM insists REAL/70 => verdict forced FAKE AND score clamped <= 39.
+CHAIN["timestamp"] += 86400
+DAYF = mod.u256(CHAIN["timestamp"] // 86400)
+
+def dead_get(url):
+    if "basescan.org" in url:
+        return FakeResp(200, json.dumps({"status": "1", "result": abi_string("")}))
+    if "ipfs.io" in url and "QmCase123" in url:
+        return FakeResp(200, json.dumps(SNAPSHOT))
+    return FakeResp(500, "")
+
+def stubborn_real_prompt(prompt, response_format=None):
+    CALLS["llm"] += 1
+    return {"verdict": "REAL", "score": 70,
+            "reasoning": "Identity tokenURI resolved empty; 5 feedback rows "
+                         "across 3 reviewers, sybil cluster 6667 bp; no endpoint evidence",
+            "evidence": []}
+
+gstub.gl.nondet.web.get = staticmethod(dead_get)
+gstub.gl.nondet.exec_prompt = staticmethod(stubborn_real_prompt)
+gstub.gl.message.sender_address = OWNER
+c.commit_daily_case(DAYF, mod.u256(9), mod.u256(8453), "ipfs://QmCase123")
+gstub.gl.message.sender_address = P1
+c.submit_guess(DAYF, mod.u8(0))
+c.run_verdict(DAYF)
+vf = json.loads(c.get_verdict(DAYF))
+assert vf["verdict"] == "FAKE", vf
+assert int(vf["score"]) <= 39, "forced FAKE must carry a FAKE-band score: " + str(vf)
+print("FORCED-FAKE SCORE CLAMP PASSED (verdict FAKE, score <= 39)")

@@ -829,16 +829,24 @@ def run_pipeline(agent_id: int, snapshot_uri: str) -> str:
     judgment = e5_llm_judgment(prompt)
 
     # Safety net: dead identity + existing feedback => FAKE regardless of
-    # LLM mood (rubric line made explicit in code for determinism).
+    # LLM mood (rubric line made explicit in code for determinism). The
+    # score must travel with the forced verdict: a FAKE case carrying
+    # >= 70 would render as "FAKE — 75/100" downstream, so clamp to the
+    # rubric's FAKE band (score < 40 => FAKE).
     verdict = str(judgment["verdict"])
+    forced_fake = False
     if liveness == "DEAD" and to_int(metrics.get("total_feedback", 0)) > 0 \
             and verdict in (VERDICT_REAL, VERDICT_SUSPICIOUS):
         verdict = VERDICT_FAKE
+        forced_fake = True
 
     digest = evidence_digest_json(e1, reg, endpoints, metrics, judgment)
+    score = clamp_score(to_int(judgment["score"]))
+    if forced_fake and score > 39:
+        score = 39
     rec = {
         "verdict": verdict,
-        "score": clamp_score(to_int(judgment["score"])),
+        "score": score,
         "reasoning": trunc(str(judgment["reasoning"]), 500),
         "evidence_digest": digest,
         "evidence": judgment["evidence"],
