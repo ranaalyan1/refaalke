@@ -225,3 +225,113 @@ except AssertionError:
     # day_status must be left rejected so a corrected round can be retried
     # (stub raised inside run_nondet_unsafe; status remains judging=1 here)
 print("R4 ENFORCEMENT PASSED")
+
+# ================= Forced-FAKE safety net carries a FAKE score ==============
+# Dead identity (tokenURI resolves empty) + feedback in the snapshot, while
+# the LLM insists REAL/70 => verdict forced FAKE AND score clamped <= 39.
+CHAIN["timestamp"] += 86400
+DAYF = mod.u256(CHAIN["timestamp"] // 86400)
+
+def dead_get(url):
+    if "basescan.org" in url:
+        return FakeResp(200, json.dumps({"status": "1", "result": abi_string("")}))
+    if "ipfs.io" in url and "QmCase123" in url:
+        return FakeResp(200, json.dumps(SNAPSHOT))
+    return FakeResp(500, "")
+
+def stubborn_real_prompt(prompt, response_format=None):
+    CALLS["llm"] += 1
+    return {"verdict": "REAL", "score": 70,
+            "reasoning": "Identity tokenURI resolved empty; 5 feedback rows "
+                         "across 3 reviewers, sybil cluster 6667 bp; no endpoint evidence",
+            "evidence": []}
+
+gstub.gl.nondet.web.get = staticmethod(dead_get)
+gstub.gl.nondet.exec_prompt = staticmethod(stubborn_real_prompt)
+gstub.gl.message.sender_address = OWNER
+c.commit_daily_case(DAYF, mod.u256(9), mod.u256(8453), "ipfs://QmCase123")
+gstub.gl.message.sender_address = P1
+c.submit_guess(DAYF, mod.u8(0))
+c.run_verdict(DAYF)
+vf = json.loads(c.get_verdict(DAYF))
+assert vf["verdict"] == "FAKE", vf
+assert int(vf["score"]) <= 39, "forced FAKE must carry a FAKE-band score: " + str(vf)
+print("FORCED-FAKE SCORE CLAMP PASSED (verdict FAKE, score <= 39)")
+
+# ============ Malformed-but-non-raising LLM output triggers one re-prompt ===
+# First exec_prompt call returns garbage (no exception); the REMINDER
+# re-prompt returns a valid judgment which must be used.
+CHAIN["timestamp"] += 86400
+DAYR = mod.u256(CHAIN["timestamp"] // 86400)
+
+def alive_get(url):
+    if "basescan.org" in url:
+        return FakeResp(200, json.dumps({"status": "1", "result": abi_string("ipfs://QmAgentReg")}))
+    if "ipfs.io" in url and "QmAgentReg" in url:
+        return FakeResp(200, REG_JSON)
+    if "ipfs.io" in url and "QmCase123" in url:
+        return FakeResp(200, json.dumps(SNAPSHOT))
+    if "alpha-trade.example" in url:
+        return FakeResp(404, "not found")
+    if url.startswith("https://fb/"):
+        n = url.split("/")[-1]
+        return FakeResp(200, FB_PROOF if n == "1.json" else FB_NO_PROOF)
+    return FakeResp(500, "")
+
+prompt_calls = {"n": 0}
+def flaky_prompt(prompt, response_format=None):
+    prompt_calls["n"] += 1
+    if prompt_calls["n"] % 2 == 1:
+        return "not json at all"          # malformed, but does NOT raise
+    return {"verdict": "FAKE", "score": 24,
+            "reasoning": "endpoints 404; 5 feedback across 3 reviewers; "
+                         "cluster 6667 bp; 1 of 5 spot-checked proofs",
+            "evidence": ["404"]}
+
+gstub.gl.nondet.web.get = staticmethod(alive_get)
+gstub.gl.nondet.exec_prompt = staticmethod(flaky_prompt)
+gstub.gl.message.sender_address = OWNER
+c.commit_daily_case(DAYR, mod.u256(42), mod.u256(8453), "ipfs://QmCase123")
+gstub.gl.message.sender_address = P1
+c.submit_guess(DAYR, mod.u8(1))
+before = prompt_calls["n"]
+c.run_verdict(DAYR)
+used = prompt_calls["n"] - before
+assert used == 4, "leader+validator x (garbage then valid) = 4 prompts, got %d" % used
+vr = json.loads(c.get_verdict(DAYR))
+assert vr["verdict"] == "FAKE" and vr["score"] == 24, "re-prompt result must be used: " + str(vr)
+print("JSON RETRY PASSED (malformed output re-prompted exactly once per run)")
+
+# ================= Crowd vs Jury: basis-point tally ========================
+CHAIN["timestamp"] += 86400
+DAYC = mod.u256(CHAIN["timestamp"] // 86400)
+P4 = "0x" + "04" * 20
+
+def crowd_prompt(prompt, response_format=None):
+    return {"verdict": "FAKE", "score": 22,
+            "reasoning": "endpoints 404; 5 feedback rows across 3 reviewers; "
+                         "sybil cluster 6667 bp; 1 of 5 spot-checked proofs",
+            "evidence": []}
+
+gstub.gl.nondet.web.get = staticmethod(alive_get)
+gstub.gl.nondet.exec_prompt = staticmethod(crowd_prompt)
+gstub.gl.message.sender_address = OWNER
+c.commit_daily_case(DAYC, mod.u256(42), mod.u256(8453), "ipfs://QmCase123")
+for p in (P1, P2, P3):
+    gstub.gl.message.sender_address = p
+    c.submit_guess(DAYC, mod.u8(0))     # REAL x3
+gstub.gl.message.sender_address = P4
+c.submit_guess(DAYC, mod.u8(1))         # FAKE x1
+
+crowd_open = json.loads(c.get_crowd(DAYC))
+assert crowd_open["real"] == 0 and crowd_open["fake"] == 0, \
+    "tally must be written at settlement, not at guess time: " + str(crowd_open)
+
+c.run_verdict(DAYC)
+crowd = json.loads(c.get_crowd(DAYC))
+assert crowd["real"] == 3 and crowd["fake"] == 1, crowd
+assert crowd["realBp"] == 7500 and crowd["fakeBp"] == 2500, crowd
+assert json.loads(c.get_verdict(DAYC))["verdict"] == "FAKE"   # jury beat the crowd
+empty = json.loads(c.get_crowd(mod.u256(999999)))
+assert empty["real"] == 0 and empty["fake"] == 0 and empty["realBp"] == 0, empty
+print("CROWD vs JURY PASSED (3 REAL / 1 FAKE => realBp 7500)")

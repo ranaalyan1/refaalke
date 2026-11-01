@@ -57,10 +57,12 @@ VALIDATOR RE-DERIVATION DESIGN (R2, R3, R4)
 * R8 — the comparison logic below (citation counting, band check, enum match)
   is pure, deterministic, integer-only: no LLM calls, no fetches, no random.
 * Integer determinism (R5): scores are integers 0–100, shares are basis
-  points, no floats anywhere in consensus-reachable code.
+  points; transient parses are immediately floored — floats are never
+  stored or compared.
 * Storage discipline (R6): TreeMap for every keyed lookup, @allow_storage
-  dataclasses for records, gl.storage.copy_to_memory before entering
-  run_nondet_unsafe, views return str via json.dumps.
+  dataclasses for records, plain int/str values bound before entering
+  run_nondet_unsafe (no storage refs cross the boundary; the unbounded
+  daily_cases map is never bulk-copied), views return str via json.dumps.
 * Verdicts are consequences, not wagers (R7): no odds, no payouts — a fixed
   scoring rule for player points only.
 * Flapping evidence (endpoint timeouts, explorer rate limits) is absorbed by
@@ -193,7 +195,7 @@ def clamp_score(x: int) -> int:
 
 
 def to_hex32(n: int) -> str:
-    """32-byte little... no: big-endian hex string of a uint256 (64 chars)."""
+    """Big-endian 64-char hex of a uint256."""
     h = ""
     v = n
     for _ in range(64):
@@ -662,34 +664,22 @@ def build_rubric_prompt(agent_name: str, agent_desc: str, reg: dict,
     )
 
 
-def e5_llm_judgment(prompt: str) -> dict:
+def _normalize_judgment(raw) -> dict:
     """
-    LLM JUDGMENT: one call with the fixed rubric; on malformed JSON, one
-    re-prompt demanding ONLY valid JSON; then UNDETERMINED. Never crashes the
-    consensus round. Score clamped 0-100; verdict forced into the enum.
+    Parse and validate one LLM attempt. Returns a clean judgment dict, or
+    None when the output is unusable (malformed JSON, not a dict, or a
+    verdict outside the enum) — None tells the caller to re-prompt.
     """
-    raw = None
-    for attempt in range(2):
-        try:
-            p = prompt if attempt == 0 else prompt + "\n\nREMINDER: output ONLY valid JSON. No prose, no markdown."
-            raw = gl.nondet.exec_prompt(p, response_format="json")
-            break
-        except Exception:
-            raw = None
-    if raw is None:
-        return {"verdict": VERDICT_UNDETERMINED, "score": 0,
-                "reasoning": "LLM judgment unavailable.", "evidence": []}
     try:
         if isinstance(raw, str):
             raw = json.loads(raw)
     except Exception:
-        raw = None
+        return None
     if not isinstance(raw, dict):
-        return {"verdict": VERDICT_UNDETERMINED, "score": 0,
-                "reasoning": "LLM returned malformed JSON twice.", "evidence": []}
-    verdict = str(safe_get(raw, "verdict", VERDICT_UNDETERMINED)).upper()
+        return None
+    verdict = str(safe_get(raw, "verdict", "")).upper()
     if verdict not in (VERDICT_REAL, VERDICT_SUSPICIOUS, VERDICT_FAKE, VERDICT_UNDETERMINED):
-        verdict = VERDICT_UNDETERMINED
+        return None
     score = clamp_score(to_int(safe_get(raw, "score", 0)))
     reasoning = trunc(str(safe_get(raw, "reasoning", "")), 500)
     evidence = safe_get(raw, "evidence", [])
@@ -697,6 +687,27 @@ def e5_llm_judgment(prompt: str) -> dict:
         evidence = []
     return {"verdict": verdict, "score": score, "reasoning": reasoning,
             "evidence": evidence}
+
+
+def e5_llm_judgment(prompt: str) -> dict:
+    """
+    LLM JUDGMENT: one call with the fixed rubric; on malformed output (bad
+    JSON OR a raised error), ONE re-prompt demanding ONLY valid JSON; then
+    UNDETERMINED. Never crashes the consensus round. Score clamped 0-100;
+    verdict forced into the enum by _normalize_judgment.
+    """
+    for attempt in range(2):
+        p = prompt if attempt == 0 else prompt + "\n\nREMINDER: output ONLY valid JSON. No prose, no markdown."
+        try:
+            raw = gl.nondet.exec_prompt(p, response_format="json")
+        except Exception:
+            continue
+        norm = _normalize_judgment(raw)
+        if norm is not None:
+            return norm
+    return {"verdict": VERDICT_UNDETERMINED, "score": 0,
+            "reasoning": "LLM returned unusable output after one re-prompt.",
+            "evidence": []}
 
 
 def evidence_digest_json(e1: dict, reg: dict, endpoints: list, metrics: dict,
@@ -829,16 +840,24 @@ def run_pipeline(agent_id: int, snapshot_uri: str) -> str:
     judgment = e5_llm_judgment(prompt)
 
     # Safety net: dead identity + existing feedback => FAKE regardless of
-    # LLM mood (rubric line made explicit in code for determinism).
+    # LLM mood (rubric line made explicit in code for determinism). The
+    # score must travel with the forced verdict: a FAKE case carrying
+    # >= 70 would render as "FAKE — 75/100" downstream, so clamp to the
+    # rubric's FAKE band (score < 40 => FAKE).
     verdict = str(judgment["verdict"])
+    forced_fake = False
     if liveness == "DEAD" and to_int(metrics.get("total_feedback", 0)) > 0 \
             and verdict in (VERDICT_REAL, VERDICT_SUSPICIOUS):
         verdict = VERDICT_FAKE
+        forced_fake = True
 
     digest = evidence_digest_json(e1, reg, endpoints, metrics, judgment)
+    score = clamp_score(to_int(judgment["score"]))
+    if forced_fake and score > 39:
+        score = 39
     rec = {
         "verdict": verdict,
-        "score": clamp_score(to_int(judgment["score"])),
+        "score": score,
         "reasoning": trunc(str(judgment["reasoning"]), 500),
         "evidence_digest": digest,
         "evidence": judgment["evidence"],
@@ -933,6 +952,9 @@ class AgentCourt(gl.Contract):
     day_guessers: TreeMap[u256, DynArray[Address]]
     # Replay tokens granted when a day settled UNDETERMINED (no streak damage).
     replay_tokens: TreeMap[Address, u256]
+    # Crowd tally per day — "wisdom of the crowd" vs the jury verdict.
+    crowd_real: TreeMap[u256, u256]
+    crowd_fake: TreeMap[u256, u256]
     owner: Address
 
     def __init__(self, owner: Address):
@@ -943,6 +965,8 @@ class AgentCourt(gl.Contract):
         self.day_status = TreeMap()
         self.day_guessers = TreeMap()
         self.replay_tokens = TreeMap()
+        self.crowd_real = TreeMap()
+        self.crowd_fake = TreeMap()
         self.owner = owner
 
     # ------------------------------------------------------------------
@@ -989,8 +1013,14 @@ class AgentCourt(gl.Contract):
         if day not in self.day_guessers:
             return
         guessers = self.day_guessers[day]
+        crowd_real_n = 0
+        crowd_fake_n = 0
         for player in guessers:
             g = to_int(self.guesses[player][day])
+            if g == GUESS_REAL:
+                crowd_real_n = crowd_real_n + 1
+            elif g == GUESS_FAKE:
+                crowd_fake_n = crowd_fake_n + 1
             stats = self.player_stats[player]
             if verdict == VERDICT_UNDETERMINED:
                 self.replay_tokens[player] = u256(to_int(self.replay_tokens.get(player, 0)) + 1)
@@ -1010,6 +1040,8 @@ class AgentCourt(gl.Contract):
                 stats.streak = u256(0)
             stats.games = u256(to_int(stats.games) + 1)
             self.player_stats[player] = stats
+        self.crowd_real[day] = u256(crowd_real_n)
+        self.crowd_fake[day] = u256(crowd_fake_n)
 
     # ------------------------------------------------------------------
     # Write functions
@@ -1085,11 +1117,14 @@ class AgentCourt(gl.Contract):
             raise Exception("day not open")
         self.day_status[day] = u8(DAY_JUDGING)
 
-        # R6: snapshot the storage the nondet round needs into memory first.
-        cases_mem = gl.storage.copy_to_memory(self.daily_cases)
+        # R6 compliance intent: do NOT copy the whole (unbounded) daily_cases
+        # TreeMap into memory — read only this day's record BEFORE the
+        # nondet round and bind plain int/str values, so no storage refs
+        # cross the run_nondet_unsafe boundary.
+        case = self.daily_cases[day]
+        agent_id_i = to_int(case.agent_id)
+        snapshot_uri_s = str(case.snapshot_uri)
         day_u = u256(day)
-        agent_id_i = to_int(cases_mem[day_u].agent_id)
-        snapshot_uri_s = str(cases_mem[day_u].snapshot_uri)
 
         def leader_fn() -> str:
             # Fresh pipeline; every fetch and the LLM call happen inside the
@@ -1229,6 +1264,24 @@ class AgentCourt(gl.Contract):
         g = to_int(pg[day])
         return json.dumps({"exists": True, "guess": g,
                            "guessLabel": "REAL" if g == GUESS_REAL else "FAKE"})
+
+    @gl.public.view
+    def get_crowd(self, day: u256) -> str:
+        """
+        Crowd vs Jury: REAL/FAKE guess counts for the day and their shares
+        in basis points (integer math only — R5).
+        """
+        real_n = to_int(self.crowd_real.get(day, 0))
+        fake_n = to_int(self.crowd_fake.get(day, 0))
+        total = real_n + fake_n
+        if total > 0:
+            real_bp = real_n * BP // total
+            fake_bp = fake_n * BP // total
+        else:
+            real_bp = 0
+            fake_bp = 0
+        return json.dumps({"day": to_int(day), "real": real_n, "fake": fake_n,
+                           "realBp": real_bp, "fakeBp": fake_bp})
 
     @gl.public.view
     def get_leaderboard(self, top_n: u256) -> str:

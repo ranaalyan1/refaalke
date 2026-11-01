@@ -66,10 +66,15 @@ mean something.
 | **R2 Evidence fetched, never trusted** | E1 anchored `eth_call tokenURI` on the Identity Registry → E2 registration file → E3 endpoints → E4 snapshot **+ live spot-checks of feedback files** for `proofOfPayment.txHash`; never judges caller-supplied text |
 | **R3 Validators re-derive** | `validator_fn` re-runs the entire E1–E5 pipeline (fresh fetches, fresh LLM call) and *then* compares — never rubber-stamps |
 | **R4 Reasoning must touch evidence** | Pure `citation_count()` gates case-deciding verdicts on ≥2 concrete citations (status codes, reviewer counts, txHash fragments, percentages) |
-| **R5 Integer determinism** | Scores 0–100 integers, shares in basis points, `to_int` clamps any transient float parsing |
-| **R6 Storage discipline** | TreeMaps for every keyed lookup, `@allow_storage` dataclasses, `gl.storage.copy_to_memory` before `run_nondet_unsafe`, views return `json.dumps` strings |
+| **R5 Integer determinism** | Scores are integers 0-100, shares in basis points; transient parses are immediately floored — floats are never stored or compared |
+| **R6 Storage discipline** | TreeMaps for every keyed lookup, `@allow_storage` dataclasses, plain int/str values bound *before* `run_nondet_unsafe` (no storage refs cross the boundary; the unbounded `daily_cases` map is never bulk-copied), views return `json.dumps` strings |
 | **R7 Verdicts ≠ wagers** | No odds, no payouts — a fixed scoring rule for points/streaks only |
 | **R8 Pure equivalence** | Comparison logic is deterministic string/integer math only: exact verdict enum match, ±10 score band, citation gate |
+
+**Access control:** `commit_daily_case` is owner/keeper-gated (curation is
+centralized by design — one agent per day, committed before guesses open),
+while `run_verdict` is permissionless: anyone may trigger the consensus
+round once the guess window closes.
 
 Edge cases from the spec are handled explicitly: explorer rate-limit → one
 retry → `UNDETERMINED` (never guess); `data:` base64 registration files (81%
