@@ -20,3 +20,6 @@ indexer/logs/
 # python
 __pycache__/
 *.pyc
+
+# inspo sandbox — never ships
+mainframe-hero/
