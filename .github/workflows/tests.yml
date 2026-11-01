@@ -1,0 +1,18 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Pure helper tests (R4/R5, ABI decode, b64, IPFS)
+        run: python3 contracts/tests/test_helpers.py
+      - name: E2E simulation (commit → guess → consensus round → settlement)
+        run: python3 contracts/tests/test_e2e.py
